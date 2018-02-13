@@ -1,5 +1,5 @@
-# Create app dir
-mkdir app
+#!/bin/bash
+set -e
 
 # Create networks
 docker network create demo--backend
@@ -24,7 +24,7 @@ docker create \
   redis:4
 
 # Create PHP-FPM
-docker build -t demo--php-fpm - < ./php-fpm.Dockerfile
+docker build -t demo--php-fpm ./php-fpm
 docker create \
   --user          "$(id -u):$(id -g)" \
   --name          demo--php-fpm \
@@ -45,15 +45,7 @@ docker create \
   nginx
 docker network connect demo--backend demo--nginx
 
-# -------------------------------------
+# --------------------------------------
 
-# Set up Magento
-docker run --rm \
-  --volume "$(pwd)/app:/app" \
-  --volume "$HOME/.composer:/tmp" \
-  --user $(id -u):$(id -g) \
-  composer create-project \
-    --ignore-platform-reqs \
-    --repository-url=https://repo.magento.com/ \
-    magento/project-community-edition \
-    /app
+# Start containers
+docker start demo--mysql demo--redis demo--php-fpm demo--nginx
