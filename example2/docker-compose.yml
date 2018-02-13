@@ -1,0 +1,46 @@
+version: '2'
+
+services:
+  mysql:
+    image: mysql:5.7
+    networks:
+      database:
+        aliases: 
+          - db
+    environment:
+      - MYSQL_DATABASE=magento
+      - MYSQL_USER=magento
+      - MYSQL_PASSWORD=secret
+      - MYSQL_ROOT_PASSWORD=secret
+  
+  redis:
+    image: redis:4
+    networks:
+      cache:
+  
+  php-fpm:
+    build: ./php-fpm
+    user: "1000:1000"
+    networks:
+      backend:
+      cache:
+      database:
+    volumes:
+      - ./app:/app
+  
+  nginx:
+    image: nginx
+    ports:
+      - "80:80"
+    networks:
+      frontend:
+      backend:
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./app:/app
+
+networks:
+  backend:
+  database:
+  cache:
+  frontend:
